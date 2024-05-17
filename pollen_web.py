@@ -205,7 +205,7 @@ def make_pollen_show(input_df, input_pollens, input_date):
         
 #######################
 # Dashboard Main Panel
-col = st.columns((5.5, 3 , 1.5), gap='small')
+col = st.columns((5.5, 2 , 1.5), gap='medium')
 
 with col[0]:
     st.markdown('#### 城市花粉指数')
