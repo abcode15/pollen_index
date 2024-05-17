@@ -14,8 +14,8 @@ from datetime import datetime, date, time, timedelta
 #######################
 # Page configuration
 st.set_page_config(
-    page_title="US Population Dashboard",
-    page_icon="🏂",
+    page_title="Pollen Allergy Index of city china",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded")
 
