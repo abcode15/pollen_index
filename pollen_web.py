@@ -151,21 +151,20 @@ def make_pollen_map(input_df, input_gdf, input_date):
     #                .LinearSegmentedColormap
     #                .from_list(cmap_name, colors_list))
 
-    # Plot the current data on each interation
-    # map_for_date.plot(column='num', cmap='coolwarm', linewidth=0.1, ax=ax, edgecolor='grey',
-    #                   legend=False, vmin=0, vmax=3000, missing_kwds={'color': 'lightgrey', 'hatch': '///'})
-    map_for_date.plot(ax=ax, 
-                      column='num',     
-                      edgecolor    = "grey",                         
-                    #   cmap         = cmap,
-                      cmap         = 'Reds',
-                      linewidth    = 0.5,
-                      legend       = True,
-                      missing_kwds = missing_kwds,
-                      scheme       = 'UserDefined',
-                      classification_kwds = classification_kwds,
-                      legend_kwds  = legend_kwds
-                     )
+    map_for_date.plot(column='num', cmap='coolwarm', linewidth=0.1, ax=ax, edgecolor='grey',
+                      legend=False, vmin=0, vmax=3000, missing_kwds={'color': 'lightgrey', 'hatch': '///'})
+    # map_for_date.plot(ax=ax, 
+    #                   column='num',     
+    #                   edgecolor    = "grey",                         
+    #                 #   cmap         = cmap,
+    #                   cmap         = 'Reds',
+    #                   linewidth    = 0.5,
+    #                   legend       = True,
+    #                   missing_kwds = missing_kwds,
+    #                   scheme       = 'UserDefined',
+    #                   classification_kwds = classification_kwds,
+    #                   legend_kwds  = legend_kwds
+    #                  )
     
     for idx, _ in enumerate(map_match_data.geometry.representative_point()):
         region = map_match_data.loc[idx, 'ADM2_ZH'][:5]
