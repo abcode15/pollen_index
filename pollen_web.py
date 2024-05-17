@@ -34,6 +34,8 @@ pollen_data['Date'] = pd.to_datetime(pollen_data['Date'], 'coerce')
 china_map = gpd.read_file('data/chn_admbnda_adm2_ocha_2020.shp')
 china_map.loc[china_map.ADM2_ZH == "西安市", 'ADM2_EN'] = 'Xian'
 
+pollen_city = pd.DataFrame((ct for ct in list(pollen_data.City.unique())), columns=('City',))
+print(pollen_city.head())
 #######################
 # Sidebar
 with st.sidebar:
@@ -41,6 +43,7 @@ with st.sidebar:
     
     # color_theme_list = ['blues', 'cividis', 'greens', 'inferno', 'magma', 'plasma', 'reds', 'rainbow', 'turbo', 'viridis']
     # selected_color_theme = st.selectbox('Select a color theme', color_theme_list)
+    
 
     # Select a day box
     day_list = [dt.date() for dt in list(pollen_data.Date.unique())]
@@ -54,6 +57,7 @@ with st.sidebar:
     selected_datetime = datetime.combine(selected_day, tm)
     selected_lower_datetime = selected_datetime - timedelta(days=9)
     pollen_day = pollen_data[pollen_data.Date == selected_datetime]
+    pollen_day = pollen_city.merge(pollen_day, on='City', how='left')
     pollen_heatmap = pollen_data[pollen_data.Date.between(selected_lower_datetime, selected_datetime)]
     pollen_heatmap['Date'] = pollen_heatmap.Date.dt.strftime('%y-%m-%d')
     
@@ -196,11 +200,13 @@ def make_pollen_map(input_df, input_gdf, input_date):
     ax.axis('off')
     return fig
     
-    
+def make_pollen_show(input_df, input_pollens, input_date):
+    return input_df
+        
 #######################
 # Dashboard Main Panel
-col = st.columns((6 , 3), gap='medium')
- 
+col = st.columns((5.5, 3 , 1.5), gap='small')
+
 with col[0]:
     st.markdown('#### 城市花粉指数')
     
@@ -211,6 +217,27 @@ with col[0]:
     st.altair_chart(heatmap, use_container_width=True)
     
 with col[1]:
+    st.markdown('#### 花粉指数列表')
+    # pollen_day['Date'] = pollen_day['Date'].astype(str)
+    st.dataframe(pollen_day, column_config={
+                    "City": st.column_config.TextColumn(
+                        "城市",
+                        width="small",
+                        max_chars=10,
+                    ),
+                    "num": st.column_config.NumberColumn(
+                        "花粉指数",
+                        help="Number of Pollen",
+                        format="%d",
+                    ),
+                    "Date": st.column_config.DatetimeColumn(
+                        "日期",
+                        format="YYYY-MM-DD",
+                    ),
+                },
+                hide_index=True
+    )
+
     st.markdown('#### 花粉最多十城市')
 
     st.dataframe(pollen_day_sorted,
@@ -228,6 +255,8 @@ with col[1]:
                         max_value=max(pollen_day_sorted.num),
                      )}
                  )
+
+with col[2]:
     
     with st.expander('花粉指数', expanded=True):
         st.write('''
