@@ -9,7 +9,7 @@ import matplotlib as mpl
 import altair as alt
 import plotly.express as px
 from datetime import datetime, date, time, timedelta
-# from st_click_detector import click_detector
+from st_click_detector import click_detector
 
 #######################
 # Page configuration
@@ -60,29 +60,30 @@ with st.sidebar:
     pollen_day_sorted = pollen_day.sort_values(by="num", ascending=False)[ : 10]
     
     # Dynamic Color Pickers
-    # st.markdown("---")
-    # st.markdown("#### Select the color code for your legend:",
-    #             unsafe_allow_html = True)
-    # # color = st.color_picker("Pick A Color", "#00f900")
-    
-    # content = """
-    #     <div style='display: flex; flex-direction: column; align-items: center;'>
-    #         <div style='display: flex; justify-content: center;'>
-    #             <a href='#' id='reds' style='background-color: red; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #             <a href='#' id='greens' style='background-color: green; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #             <a href='#' id='blues' style='background-color: blue; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #             <a href='#' id='yellowgreen' style='background-color: yellow; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #         </div>
-    #     </div>
-    #     """
+    st.markdown("---")
+    st.markdown("#### Select the color code for your legend:",
+                unsafe_allow_html = True)
 
-    # color_clicked = click_detector(content)
+    # color = st.color_picker("Pick A Color", "#00f900")
     
-    # if color_clicked == "":
-    #     print("color_clicked == ''")
-    #     color_clicked = "blues"
+    content = """
+        <div style='display: flex; flex-direction: column; align-items: center;'>
+            <div style='display: flex; justify-content: center;'>
+                <a href='#' id='reds' style='background-color: red; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+                <a href='#' id='greens' style='background-color: green; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+                <a href='#' id='blues' style='background-color: blue; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+                <a href='#' id='yellowgreen' style='background-color: yellow; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+            </div>
+        </div>
+        """
 
-    color_clicked = "blues"
+    color_clicked = click_detector(content)
+    
+    if color_clicked == "":
+        print("color_clicked == ''")
+        color_clicked = "blues"
+
+    # color_clicked = "blues"
     
 #######################
 # Plots
