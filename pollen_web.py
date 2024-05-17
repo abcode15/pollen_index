@@ -60,29 +60,28 @@ with st.sidebar:
     pollen_day_sorted = pollen_day.sort_values(by="num", ascending=False)[ : 10]
     
     # Dynamic Color Pickers
-    # st.markdown("---")
-    # st.markdown("#### Select the color code for your legend:",
-    #             unsafe_allow_html = True)
-    # # color = st.color_picker("Pick A Color", "#00f900")
+    st.markdown("---")
+    st.markdown("#### Select the color code for your legend:",
+                unsafe_allow_html = True)
+    # color = st.color_picker("Pick A Color", "#00f900")
     
-    # content = """
-    #     <div style='display: flex; flex-direction: column; align-items: center;'>
-    #         <div style='display: flex; justify-content: center;'>
-    #             <a href='#' id='reds' style='background-color: red; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #             <a href='#' id='greens' style='background-color: green; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #             <a href='#' id='blues' style='background-color: blue; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #             <a href='#' id='yellowgreen' style='background-color: yellow; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
-    #         </div>
-    #     </div>
-    #     """
+    content = """
+        <div style='display: flex; flex-direction: column; align-items: center;'>
+            <div style='display: flex; justify-content: center;'>
+                <a href='#' id='reds' style='background-color: red; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+                <a href='#' id='greens' style='background-color: green; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+                <a href='#' id='blues' style='background-color: blue; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+                <a href='#' id='yellowgreen' style='background-color: yellow; width: 40px; height: 40px; margin: 10px; display: flex; justify-content: center; align-items: center;'></a>
+            </div>
+        </div>
+        """
 
-    # color_clicked = click_detector(content)
+    color_clicked = click_detector(content)
     
-    # if color_clicked == "":
-    #     print("color_clicked == ''")
-    #     color_clicked = "blues"
+    if color_clicked == "":
+        print("color_clicked == ''")
+        color_clicked = "blues"
 
-    color_clicked = "blues"
     
 #######################
 # Plots
@@ -204,8 +203,8 @@ col = st.columns((6 , 3), gap='medium')
 with col[0]:
     st.markdown('#### 城市花粉指数')
     
-    pollenplt = make_pollen_map(pollen_day, china_map, selected_day)
-    st.pyplot(pollenplt, use_container_width=True)    
+    # pollenplt = make_pollen_map(pollen_day, china_map, selected_day)
+    # st.pyplot(pollenplt, use_container_width=True)    
     
     heatmap = make_heatmap(pollen_heatmap, 'Date', 'City', 'num', color_clicked)
     st.altair_chart(heatmap, use_container_width=True)
