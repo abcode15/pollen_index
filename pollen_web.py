@@ -204,8 +204,8 @@ col = st.columns((6 , 3), gap='medium')
 with col[0]:
     st.markdown('#### 城市花粉指数')
     
-    # pollenplt = make_pollen_map(pollen_day, china_map, selected_day)
-    # st.pyplot(pollenplt, use_container_width=True)    
+    pollenplt = make_pollen_map(pollen_day, china_map, selected_day)
+    st.pyplot(pollenplt, use_container_width=True)    
     
     heatmap = make_heatmap(pollen_heatmap, 'Date', 'City', 'num', color_clicked)
     st.altair_chart(heatmap, use_container_width=True)
