@@ -28,16 +28,16 @@ plt.rcParams['axes.unicode_minus']=False#用来正常显示负号
 
 #######################
 # Load data
-pollen_data = pd.read_csv('../pollen-allergy/data/pollen_optimize.csv')
+pollen_data = pd.read_csv('data/pollen_optimize.csv')
 pollen_data = pollen_data.loc[:, ['Date', 'num', 'City']]
 pollen_data['Date'] = pd.to_datetime(pollen_data['Date'], 'coerce')
-china_map = gpd.read_file('../data-china/maps/chn_adm_ocha_2020_shp/chn_admbnda_adm2_ocha_2020.shp')
+china_map = gpd.read_file('data/chn_admbnda_adm2_ocha_2020.shp')
 china_map.loc[china_map.ADM2_ZH == "西安市", 'ADM2_EN'] = 'Xian'
 
 #######################
 # Sidebar
 with st.sidebar:
-    st.title('🏂 中国部分城市花粉指数')
+    st.title('中国部分城市花粉指数')
     
     # color_theme_list = ['blues', 'cividis', 'greens', 'inferno', 'magma', 'plasma', 'reds', 'rainbow', 'turbo', 'viridis']
     # selected_color_theme = st.selectbox('Select a color theme', color_theme_list)
@@ -47,7 +47,9 @@ with st.sidebar:
     day_list.sort(reverse=True)
     max_day = day_list[0]
     min_day = day_list[-1]
-    selected_day = st.selectbox('Select a day', day_list)
+    st.markdown("---")
+    st.markdown("### Select a day:")
+    selected_day = st.selectbox(' days list', day_list)
     tm = time(0,0,0)
     selected_datetime = datetime.combine(selected_day, tm)
     selected_lower_datetime = selected_datetime - timedelta(days=9)
@@ -58,7 +60,8 @@ with st.sidebar:
     pollen_day_sorted = pollen_day.sort_values(by="num", ascending=False)[ : 10]
     
     # Dynamic Color Pickers
-    st.markdown("<b>Select the color code for your legend</b>:",
+    st.markdown("---")
+    st.markdown("#### Select the color code for your legend:",
                 unsafe_allow_html = True)
     # color = st.color_picker("Pick A Color", "#00f900")
     
