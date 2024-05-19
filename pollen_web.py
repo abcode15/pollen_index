@@ -6,10 +6,14 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib as mpl
+from matplotlib.pyplot import MultipleLocator
+from matplotlib.dates import DateFormatter
+import matplotlib.dates as mdates
 import altair as alt
 import plotly.express as px
 from datetime import datetime, date, time, timedelta
 from st_click_detector import click_detector
+import numpy as np
 
 #######################
 # Page configuration
@@ -35,7 +39,7 @@ china_map = gpd.read_file('data/chn_admbnda_adm2_ocha_2020.shp')
 china_map.loc[china_map.ADM2_ZH == "西安市", 'ADM2_EN'] = 'Xian'
 
 pollen_city = pd.DataFrame((ct for ct in list(pollen_data.City.unique())), columns=('City',))
-print(pollen_city.head())
+
 #######################
 # Sidebar
 with st.sidebar:
@@ -84,31 +88,72 @@ with st.sidebar:
     color_clicked = click_detector(content)
     
     if color_clicked == "":
-        print("color_clicked == ''")
         color_clicked = "blues"
 
     # color_clicked = "blues"
     
 #######################
 # Plots
+######################
+# Global Value
+columnA = 'Beijing Municipality'
+columnB = 'Chengde'
+labelA = '北京'
+labelB = '承德'
+# Chart
+def make_chart(input_df):
+    data_set = input_df.loc[pollen_data.City.isin([columnA, columnB])]
+    pollen_line = data_set.pivot(index='Date', columns='City', values='num')
+    pollen_line = pollen_line.sort_index()
+    min_date = pollen_line.index.min()
+    max_date = pollen_line.index.max()
+    ############################
+    # Init
+    fig, ax = plt.subplots(figsize=(12,8))
+    # ax.xaxis.set_major_locator(mdates.DayLocator(interval=7))
+    # ax.xaxis.set_minor_locator(mdates.DayLocator())
+    # ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    
+    locator = mdates.AutoDateLocator(minticks=11, maxticks=21)
+    formatter = mdates.ConciseDateFormatter(locator)
+    formatter.formats = ['%y',  # ticks are mostly years
+                         '%y-%m',       # ticks are mostly months
+                         '%d',       # ticks are mostly days
+                         '%H:%M',    # hrs
+                         '%H:%M',    # min
+                         '%S.%f', ]  # secs
+    # these are mostly just the level above...
+    formatter.zero_formats = [''] + formatter.formats[:-1]
+    # ...except for ticks that are mostly hours, then it is nice to have
+    # month-day:
+    formatter.zero_formats[3] = '%m-%d'
 
-# Heatmap
-def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
-    heatmap = alt.Chart(input_df).mark_rect().encode(
-            y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="日期", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
-            x=alt.X(f'{input_x}:O', axis=alt.Axis(title="", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
-            color=alt.Color(f'max({input_color}):Q',
-                             legend=None,
-                             scale=alt.Scale(scheme=input_color_theme)),
-            stroke=alt.value('black'),
-            strokeWidth=alt.value(0.25),
-        ).properties(width=900
-        ).configure_axis(
-        labelFontSize=12,
-        titleFontSize=12
-        ) 
-    # height=300
-    return heatmap
+    formatter.offset_formats = ['',
+                                '%Y',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d %H:%M', ]
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+      
+    ax.grid(True)
+    ax.grid(which='major', color='#DDDDDD', linewidth=0.9)
+    ax.grid(which='minor', color='#CCCCCC', linestyle=':', linewidth=0.8)
+    ax.minorticks_on()
+
+    # Set title
+    ax.set_title('花粉指数: 北京 ：承德')
+    # Set the limits for the Y axis
+    ax.set_ylim([-100, 2100])
+    # ax.set_xlim([0, 100])
+    ax.set_xlim(np.array([min_date, max_date]).astype('datetime64[D]'))
+  
+    chartA, = ax.plot(np.array(list(pollen_line.index)).astype('datetime64[D]'), list(pollen_line[columnA]), marker='o', color= '#00A88F', linestyle='dotted', label=labelA)
+    chartB, = ax.plot(np.array(list(pollen_line.index)).astype('datetime64[D]'), list(pollen_line[columnB]), marker='+', color= '#884b8f', linestyle='dotted', label=labelB)    
+    legend = ax.legend(loc='upper left', shadow=False, fontsize='medium')
+    legend.get_frame().set_facecolor('None')
+    return fig
 
 # Pollen Map
 def make_pollen_map(input_df, input_gdf, input_date):
@@ -200,8 +245,8 @@ def make_pollen_map(input_df, input_gdf, input_date):
     ax.axis('off')
     return fig
     
-def make_pollen_show(input_df, input_pollens, input_date):
-    return input_df
+# def make_pollen_show(input_df, input_pollens, input_date):
+#     return input_df
         
 #######################
 # Dashboard Main Panel
@@ -213,8 +258,8 @@ with col[0]:
     pollenplt = make_pollen_map(pollen_day, china_map, selected_day)
     st.pyplot(pollenplt, use_container_width=True)    
     
-    heatmap = make_heatmap(pollen_heatmap, 'Date', 'City', 'num', color_clicked)
-    st.altair_chart(heatmap, use_container_width=True)
+    fig = make_chart(pollen_data)
+    st.pyplot(fig, use_container_width=True)
     
 with col[1]:
     st.markdown('#### 花粉指数列表')
