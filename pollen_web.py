@@ -294,7 +294,7 @@ def make_bar(names, values, label, x, y):
 # Dashboard Main Panel
 st.markdown('#### 城市花粉指数')
 
-col = st.columns((7, 6), gap='small')
+col = st.columns((6, 5), gap='small')
 
 with col[0]:
     
