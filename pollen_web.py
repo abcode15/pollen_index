@@ -248,9 +248,11 @@ def make_pollen_map(input_df, input_gdf, input_date):
 def make_bar(names, values, label, x, y):
     # Figure Size
     fig, ax = plt.subplots(figsize =(x, y))
+    fig.patch.set_facecolor('none')
     
     # Horizontal Bar Plot
-    ax.barh(names, values)
+    color = 'lightblue'
+    ax.barh(names, values, color=color)
     
     # Remove axes splines
     for s in ['top', 'bottom', 'left', 'right']:
@@ -265,7 +267,7 @@ def make_bar(names, values, label, x, y):
     ax.yaxis.set_tick_params(pad = 10)
     
     # Add x, y gridlines
-    ax.grid(b = True, color ='grey',
+    ax.grid(visible = True, color ='grey',
             linestyle ='-.', linewidth = 0.5,
             alpha = 0.2)
     
@@ -276,7 +278,7 @@ def make_bar(names, values, label, x, y):
         plt.text(i.get_width()+0.2, i.get_y()+0.5, 
                 str(round((i.get_width()), 2)),
                 fontsize = 10, fontweight ='bold',
-                color ='grey')
+                color ='green')
     
     # Add Plot Title
     # ax.set_title(label, loc ='left', )
