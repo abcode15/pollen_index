@@ -218,7 +218,7 @@ def make_pollen_map(input_df, input_gdf, input_date):
     
     for idx, _ in enumerate(map_match_data.geometry.representative_point()):
         region = map_match_data.loc[idx, 'ADM2_ZH'][:5]
-        ax.text(_.x, _.y, region, ha="center", va="center", size=4)
+        ax.text(_.x, _.y, region, ha="center", va="center", size=3)
     
     #Title, lines and annotations
     # ax.set_title('Tracking Pollen Index', fontsize=25, pad=30, weight='bold')
@@ -277,7 +277,7 @@ def make_bar(names, values, label, x, y):
         plt.text(i.get_width()+0.2, i.get_y()+0.5, 
                 str(round((i.get_width()), 2)),
                 fontsize = 10, fontweight ='bold',
-                color ='green')
+                color ='lightblue')
     
     # Add Plot Title
     # ax.set_title(label, loc ='left', )
