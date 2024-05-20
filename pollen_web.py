@@ -248,7 +248,7 @@ def make_pollen_map(input_df, input_gdf, input_date):
 def make_bar(names, values, label, x, y):
     # Figure Size
     fig, ax = plt.subplots(figsize =(x, y))
-    fig.patch.set_facecolor('none')
+    fig.patch.set_facecolor('grey')
     
     # Horizontal Bar Plot
     color = 'lightblue'
