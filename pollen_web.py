@@ -245,30 +245,74 @@ def make_pollen_map(input_df, input_gdf, input_date):
     ax.axis('off')
     return fig
     
-# def make_pollen_show(input_df, input_pollens, input_date):
-#     return input_df
+def make_bar(names, values, label, x, y):
+    # Figure Size
+    fig, ax = plt.subplots(figsize =(x, y))
+    
+    # Horizontal Bar Plot
+    ax.barh(names, values)
+    
+    # Remove axes splines
+    for s in ['top', 'bottom', 'left', 'right']:
+        ax.spines[s].set_visible(False)
+    
+    # Remove x, y Ticks
+    ax.xaxis.set_ticks_position('none')
+    ax.yaxis.set_ticks_position('none')
+    
+    # Add padding between axes and labels
+    ax.xaxis.set_tick_params(pad = 5)
+    ax.yaxis.set_tick_params(pad = 10)
+    
+    # Add x, y gridlines
+    ax.grid(b = True, color ='grey',
+            linestyle ='-.', linewidth = 0.5,
+            alpha = 0.2)
+    
+    ax.invert_yaxis()
+    
+    # Add annotation to bars
+    for i in ax.patches:
+        plt.text(i.get_width()+0.2, i.get_y()+0.5, 
+                str(round((i.get_width()), 2)),
+                fontsize = 10, fontweight ='bold',
+                color ='grey')
+    
+    # Add Plot Title
+    # ax.set_title(label, loc ='left', )
+    
+    # Add Text watermark
+    fig.text(0.9, 0.15, 'robertyu', fontsize = 12,
+            color ='grey', ha ='right', va ='bottom',
+            alpha = 0.7)
+    
+    return fig
+
         
 #######################
 # Dashboard Main Panel
-col = st.columns((5.5, 2 , 1.5), gap='medium')
+st.markdown('#### 城市花粉指数')
+
+col = st.columns((6, 6), gap='small')
 
 with col[0]:
-    st.markdown('#### 城市花粉指数')
     
     pollenplt = make_pollen_map(pollen_day, china_map, selected_day)
     st.pyplot(pollenplt, use_container_width=True)    
-    
+
+with col[1]:    
     fig = make_chart(pollen_data)
     st.pyplot(fig, use_container_width=True)
-    
-with col[1]:
+
+col = st.columns((2, 2, 1), gap='medium')    
+with col[0]:
     st.markdown('#### 花粉指数列表')
-    # pollen_day['Date'] = pollen_day['Date'].astype(str)
+    pollen_day['Date'] = pollen_day['Date'].astype(str)
     st.dataframe(pollen_day, column_config={
                     "City": st.column_config.TextColumn(
                         "城市",
-                        width="small",
-                        max_chars=10,
+                        width="medium",
+                        # max_chars=20,
                     ),
                     "num": st.column_config.NumberColumn(
                         "花粉指数",
@@ -282,27 +326,23 @@ with col[1]:
                 },
                 hide_index=True
     )
+    
+    # table_day = pollen_day.drop('Date', axis=1)
+    # table_day['num']  = table_day['num'].fillna(0)
+    # table_day['num']  = table_day['num'].astype(int)
+    # st.table(table_day)
 
+
+with col[1]:
     st.markdown('#### 花粉最多十城市')
 
-    st.dataframe(pollen_day_sorted,
-                 column_order=("City", "num"),
-                 hide_index=True,
-                 width=None,
-                 column_config={
-                    "城市": st.column_config.TextColumn(
-                        "City",
-                    ),
-                    "花粉值": st.column_config.ProgressColumn(
-                        "num",
-                        format="%d",
-                        min_value=0,
-                        max_value=max(pollen_day_sorted.num),
-                     )}
-                 )
+    cities = pollen_day_sorted['City']
+    values = pollen_day_sorted['num']
+    label  = '花粉最多十城市'
+    fig = make_bar(cities, values, label, 5, 5)
+    st.pyplot(fig)
 
-with col[2]:
-    
+with col[2]:        
     with st.expander('花粉指数', expanded=True):
         st.write('''
             - 极高（>=801）： 极易过敏，敏感人群需加强防护和用药，室内需开启净化装置
