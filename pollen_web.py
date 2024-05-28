@@ -295,15 +295,23 @@ def make_bar(names, values, label, x, y):
 class DataLine():
     xlist: np.array
     ylist: np.array
+    annotation: np.array
     label: str
 
 def get_aqi_data(df, column_t, column_a, label_t, label_a):
     times = [i.replace(tzinfo=None) for i in list(pd.to_datetime(df['time']))]
-    tempe_data = DataLine(times, df[column_t], label_t)
-    aqi_data = DataLine(times, df[column_a], label_a)
+    tempe_data = DataLine(times, df[column_t], [], label_t)
+    aqi_data = DataLine(times, df[column_a], [], label_a)
     
-    return tempe_data, aqi_data      
+    return tempe_data, aqi_data    
+
+def get_weather_data(df, column_high, column_low, column_annotation, label_high, label_low):
+    times = [i.replace(tzinfo=None) for i in list(pd.to_datetime(df['日期']))]
+    high_data = DataLine(times, df[column_high], df[column_annotation], label_high)
+    low_data = DataLine(times, df[column_low], df[column_annotation], label_low)
     
+    return high_data, low_data    
+        
 def make_aqi_charts(ax, datas: list[DataLine], markers: list[str], colors: list[str], title: str):
 
     ############################
@@ -365,8 +373,77 @@ def make_aqi_charts(ax, datas: list[DataLine], markers: list[str], colors: list[
     # ax.xaxis.axis_date(tz='Asia/Shanghai')
     legend = ax.legend(loc='upper left', shadow=False, fontsize='medium')
     legend.get_frame().set_facecolor('None')
-    
+
+    # for i in range(25):
+    #     ax.annotate(i, xy=(datas[0].xlist[i], datas[0].ylist[i]))    
     return charts
+
+def make_weather_charts(ax, datas: list[DataLine], markers: list[str], colors: list[str], title: str):
+
+    ############################
+    # Init
+    
+    locator = mdates.AutoDateLocator(minticks=5, maxticks=11)
+    formatter = mdates.ConciseDateFormatter(locator)
+    formatter.formats = ['%y',  # ticks are mostly years
+                         '%y-%m',       # ticks are mostly months
+                         '%d',       # ticks are mostly days
+                         '%H:%M',    # hrs
+                         '%H:%M',    # min
+                         '%S.%f', ]  # secs
+    # these are mostly just the level above...
+    formatter.zero_formats = [''] + formatter.formats[:-1]
+    # ...except for ticks that are mostly hours, then it is nice to have
+    # month-day:
+    formatter.zero_formats[3] = '%m-%d'
+
+    formatter.offset_formats = ['',
+                                '%Y',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d %H:%M', ]
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+      
+    ax.grid(True)
+    ax.grid(which='major', color='#DDDDDD', linewidth=0.9)
+    ax.grid(which='minor', color='#CCCCCC', linestyle=':', linewidth=0.8)
+    ax.minorticks_on()
+
+    # Set title
+    ax.set_title(title)
+    
+    xmin = np.min(datas[0].xlist)
+    xmax = np.max(datas[0].xlist)
+    ymin = np.min(9999)
+    ymax = np.max(-9999)
+    
+    charts = []
+    i = 0
+    for data in datas:
+        chart = ax.plot(data.xlist, data.ylist, marker=markers[i], color= colors[i], linestyle='dotted', label=data.label)
+        charts.append(chart)
+        i += 1
+        if ymin > np.min(data.ylist):
+            ymin = np.min(data.ylist)
+        if ymax < np.max(data.ylist):
+            ymax = np.max(data.ylist)
+
+    # Set the limits for the X，Y axis
+    margin = abs(ymin // 5)
+    if abs(ymax // 5) > margin:
+        margin = abs(ymax // 5)
+    ax.set_ylim([ymin - margin, ymax + margin])
+    ax.set_xlim([xmin, xmax])
+    # ax.xaxis.axis_date(tz='Asia/Shanghai')
+    legend = ax.legend(loc='upper left', shadow=False, fontsize='medium')
+    legend.get_frame().set_facecolor('None')
+    print(datas[0])
+    for i in range(len(datas[0].annotation)):
+        ax.annotate(datas[0].annotation[i], xy=(datas[0].xlist[i], datas[0].ylist[i] + 1), fontsize=5)    
+    return charts
+
 
 def make_full_aqi_charts():
 #     dfA, dfB = get_aqi_df(dr)
@@ -381,7 +458,27 @@ def make_full_aqi_charts():
     make_aqi_charts(ax1, [dataA_t, dataB_t], ['o', 'x'], ['#00A88F', '#884b8f'], '温度 北京 - 赤峰')
     make_aqi_charts(ax2, [dataA_a, dataB_a], ['o', 'x'], ['#00A88F', '#884b8f'], '空气质量 北京 - 赤峰')
 
+    # plt.gca().xaxis_date('Asia/Shanghai')
+    # plt.show()
     return fig
+
+def make_full_weather_charts():
+#     dfA, dfB = get_aqi_df(dr)
+    dfA = pd.read_csv('data/weather_beijing.csv')
+    dfB = pd.read_csv('data/weather_chifeng.csv')
+    
+    dataA_t, dataA_a = get_weather_data(dfA, "最高气温", "最低气温", "天气", "北京最高温度", '北京最低温度')
+    dataB_t, dataB_a = get_weather_data(dfB, "最高气温", "最低气温", "天气", "赤峰最高温度", '赤峰最低温度')
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12,4))
+    
+    make_weather_charts(ax1, [dataA_t, dataA_a], ['o', 'x'], ['#00A88F', '#884b8f'], '北京未来15天天气预报')
+    make_weather_charts(ax2, [dataB_t, dataB_a], ['o', 'x'], ['#00A88F', '#884b8f'], '赤峰未来15天天气预报')
+
+    # plt.gca().xaxis_date('Asia/Shanghai')
+    # plt.show()
+    return fig
+
 
 
         
@@ -451,3 +548,6 @@ with col[2]:
 
 # Show aqi
 st.pyplot(make_full_aqi_charts())
+
+# show weather
+st.pyplot(make_full_weather_charts())
