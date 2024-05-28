@@ -14,6 +14,7 @@ import plotly.express as px
 from datetime import datetime, date, time, timedelta
 from st_click_detector import click_detector
 import numpy as np
+from dataclasses import dataclass
 
 #######################
 # Page configuration
@@ -289,6 +290,100 @@ def make_bar(names, values, label, x, y):
     
     return fig
 
+    
+@dataclass
+class DataLine():
+    xlist: np.array
+    ylist: np.array
+    label: str
+
+def get_aqi_data(df, column_t, column_a, label_t, label_a):
+    times = [i.replace(tzinfo=None) for i in list(pd.to_datetime(df['time']))]
+    tempe_data = DataLine(times, df[column_t], label_t)
+    aqi_data = DataLine(times, df[column_a], label_a)
+    
+    return tempe_data, aqi_data      
+    
+def make_aqi_charts(ax, datas: list[DataLine], markers: list[str], colors: list[str], title: str):
+
+    ############################
+    # Init
+    
+    locator = mdates.AutoDateLocator(minticks=5, maxticks=11)
+    formatter = mdates.ConciseDateFormatter(locator)
+    formatter.formats = ['%y',  # ticks are mostly years
+                         '%y-%m',       # ticks are mostly months
+                         '%d',       # ticks are mostly days
+                         '%H:%M',    # hrs
+                         '%H:%M',    # min
+                         '%S.%f', ]  # secs
+    # these are mostly just the level above...
+    formatter.zero_formats = [''] + formatter.formats[:-1]
+    # ...except for ticks that are mostly hours, then it is nice to have
+    # month-day:
+    formatter.zero_formats[3] = '%m-%d'
+
+    formatter.offset_formats = ['',
+                                '%Y',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d',
+                                '%Y-%m-%d %H:%M', ]
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+      
+    ax.grid(True)
+    ax.grid(which='major', color='#DDDDDD', linewidth=0.9)
+    ax.grid(which='minor', color='#CCCCCC', linestyle=':', linewidth=0.8)
+    ax.minorticks_on()
+
+    # Set title
+    ax.set_title(title)
+    
+    xmin = np.min(datas[0].xlist)
+    xmax = np.max(datas[0].xlist)
+    ymin = np.min(9999)
+    ymax = np.max(-9999)
+    
+    charts = []
+    i = 0
+    for data in datas:
+        chart = ax.plot(data.xlist, data.ylist, marker=markers[i], color= colors[i], linestyle='dotted', label=data.label)
+        charts.append(chart)
+        i += 1
+        if ymin > np.min(data.ylist):
+            ymin = np.min(data.ylist)
+        if ymax < np.max(data.ylist):
+            ymax = np.max(data.ylist)
+
+    # Set the limits for the X，Y axis
+    margin = abs(ymin // 5)
+    if abs(ymax // 5) > margin:
+        margin = abs(ymax // 5)
+    ax.set_ylim([ymin - margin, ymax + margin])
+    ax.set_xlim([xmin, xmax])
+    # ax.xaxis.axis_date(tz='Asia/Shanghai')
+    legend = ax.legend(loc='upper left', shadow=False, fontsize='medium')
+    legend.get_frame().set_facecolor('None')
+    
+    return charts
+
+def make_full_aqi_charts():
+#     dfA, dfB = get_aqi_df(dr)
+    dfA = pd.read_csv('data/aqi_beijing.csv')
+    dfB = pd.read_csv('data/aqi_chifeng.csv')
+    
+    dataA_t, dataA_a = get_aqi_data(dfA, "beijing_t", "beijing_a", "北京温度", '北京空气质量')
+    dataB_t, dataB_a = get_aqi_data(dfB, "chifeng_t", "chifeng_a", "赤峰温度", '赤峰空气质量')
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12,4))
+    
+    make_aqi_charts(ax1, [dataA_t, dataB_t], ['o', 'x'], ['#00A88F', '#884b8f'], '温度 北京 - 赤峰')
+    make_aqi_charts(ax2, [dataA_a, dataB_a], ['o', 'x'], ['#00A88F', '#884b8f'], '空气质量 北京 - 赤峰')
+
+    return fig
+
+
         
 #######################
 # Dashboard Main Panel
@@ -353,3 +448,6 @@ with col[2]:
             - 较低（51~100）：敏感人群外出需防护
             - 很低（<=50）：不易过敏
             ''')
+
+# Show aqi
+st.pyplot(make_full_aqi_charts())
