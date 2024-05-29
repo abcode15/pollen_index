@@ -44,7 +44,7 @@ pollen_city = pd.DataFrame((ct for ct in list(pollen_data.City.unique())), colum
 #######################
 # Sidebar
 with st.sidebar:
-    st.title('中国部分城市花粉指数')
+    st.title('城市天气数据')
     
     # color_theme_list = ['blues', 'cividis', 'greens', 'inferno', 'magma', 'plasma', 'reds', 'rainbow', 'turbo', 'viridis']
     # selected_color_theme = st.selectbox('Select a color theme', color_theme_list)
@@ -484,16 +484,17 @@ def make_full_weather_charts():
         
 #######################
 # Dashboard Main Panel
-st.markdown('#### 城市花粉指数')
+st.markdown('#### 城市天气指数数据')
 
 col = st.columns((6, 5), gap='small')
 
 with col[0]:
-    
+    st.markdown('##### 城市花粉指数')    
     pollenplt = make_pollen_map(pollen_day, china_map, selected_day)
     st.pyplot(pollenplt, use_container_width=True)    
 
-with col[1]:    
+with col[1]:  
+    st.markdown('##### 城市花粉指数对比')    
     fig = make_chart(pollen_data)
     st.pyplot(fig, use_container_width=True)
 
@@ -547,7 +548,9 @@ with col[2]:
             ''')
 
 # Show aqi
+st.markdown('#### 城市空气质量指数')
 st.pyplot(make_full_aqi_charts())
 
 # show weather
+st.markdown('#### 城市天气预报')
 st.pyplot(make_full_weather_charts()) 
