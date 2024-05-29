@@ -550,4 +550,4 @@ with col[2]:
 st.pyplot(make_full_aqi_charts())
 
 # show weather
-st.pyplot(make_full_weather_charts())
+st.pyplot(make_full_weather_charts()) 
